@@ -1,0 +1,5 @@
+ACTION=="remove", GOTO="default_end"
+
+SUBSYSTEM=="input", KERNEL=="event*",  ENV{YOGABOOK_PEN_KEY}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="pen-key-handler@%E{DEVNAME}.service"
+
+LABEL="default_end"

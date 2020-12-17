@@ -1,0 +1,49 @@
+#!/usr/bin/python3
+
+import evdev, evdev.ecodes as ecodes
+import subprocess
+import sys
+import os
+
+GOODIX_DEV = "i2c-GDIX1001:00"
+GOODIX_DRV_PATH = "/sys/bus/i2c/drivers/Goodix-TS"
+
+WACOM_DEV = "i2c-WCOM0019:00"
+WACOM_DRV_PATH = "/sys/bus/i2c/drivers/i2c_hid"
+
+def switch_to_digitizer_mode():
+    subprocess.run(f"echo 1; echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/unbind", shell=True, check=False)
+    subprocess.run(f"echo 2; echo {WACOM_DEV} > {WACOM_DRV_PATH}/bind", shell=True, check=False)
+#    subprocess.run("echo 0 > /sys/class/pwm/pwmchip1/pwm0/enable", shell=True, check=False)
+
+def switch_to_keyboard_mode():
+    subprocess.run(f"echo 1; echo {WACOM_DEV} > {WACOM_DRV_PATH}/unbind", shell=True, check=False)
+    subprocess.run(f"echo 2; echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/bind", shell=True, check=False)
+
+
+if len(sys.argv) == 1:
+    sys.exit("Usage: pen-key-handler.py </dev/input/event*>")
+
+device = sys.argv[1]
+penKey = evdev.InputDevice(device)
+
+caps = penKey.capabilities()
+
+print(str(caps))
+
+if not (ecodes.KEY_TOUCHPAD_OFF in caps[ecodes.EV_KEY] and ecodes.KEY_TOUCHPAD_ON in caps[ecodes.EV_KEY]):
+        sys.exit("Evdev cannot report touchpad on/off keys: wrong device?")
+
+for event in penKey.read_loop():
+    if event.type==evdev.ecodes.EV_KEY:
+        print(evdev.categorize(event))
+
+        if event.value == 0:
+            continue
+
+        if event.code == ecodes.KEY_TOUCHPAD_OFF:
+            switch_to_keyboard_mode()
+
+        if event.code == ecodes.KEY_TOUCHPAD_ON:
+            switch_to_digitizer_mode()
+

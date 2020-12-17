@@ -1,0 +1,5 @@
+pen-key-handler usr/sbin
+61-yogabook-penbutton.rules lib/udev/rules.d
+61-yogabook-wmi.hwdb lib/udev/hwdb.d
+pen-key-handler@.service lib/systemd/system
+

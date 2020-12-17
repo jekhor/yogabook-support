@@ -1,0 +1,18 @@
+Source: yogabook-support
+Section: misc
+Priority: optional
+Maintainer: Yauhen Kharuzhy <jekhor@gmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.5.0
+Homepage: https://github.com/jekhor/yogabook-support
+Vcs-Browser: https://github.com/jekhor/yogabook-support
+Vcs-Git: https://github.com/jekhor/yogabook-support
+Rules-Requires-Root: no
+
+Package: yogabook-support
+Architecture: all
+Depends: python3, ${shlibs:Depends}, ${misc:Depends}
+Description: Files and utilities to support Linux on Lenovo Yoha Book tablet
+ Package contains pen button handler to switch halo keyboard mode between
+ keyboard and wacom digitizer.
+
