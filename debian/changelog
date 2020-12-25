@@ -1,3 +1,10 @@
+yogabook-support (1.1) unstable; urgency=medium
+
+  * Add udev&hwdb rules for accelerometers
+  * Add python3-evdev dependency
+
+ -- Yauhen Kharuzhy <jekhor@gmail.com>  Fri, 25 Dec 2020 20:01:29 +0300
+
 yogabook-support (1.0) unstable; urgency=medium
 
   * Initial Release.
