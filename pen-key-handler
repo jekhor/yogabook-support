@@ -33,7 +33,9 @@ print(str(caps))
 if not (ecodes.KEY_TOUCHPAD_OFF in caps[ecodes.EV_KEY] and ecodes.KEY_TOUCHPAD_ON in caps[ecodes.EV_KEY]):
         sys.exit("Evdev cannot report touchpad on/off keys: wrong device?")
 
-switch_to_keyboard_mode()
+# FIXME: Now first switch to wacom mode doesn't work but if we unbind wacom device here,
+# goodix touchpad (keyboard) stops working.
+#switch_to_keyboard_mode()
 
 for event in penKey.read_loop():
     if event.type==evdev.ecodes.EV_KEY:
