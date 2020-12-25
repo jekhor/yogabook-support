@@ -12,12 +12,12 @@ WACOM_DEV = "i2c-WCOM0019:00"
 WACOM_DRV_PATH = "/sys/bus/i2c/drivers/i2c_hid"
 
 def switch_to_digitizer_mode():
-    subprocess.run(f"echo 1; echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/unbind", shell=True, check=False)
-    subprocess.run(f"echo 2; echo {WACOM_DEV} > {WACOM_DRV_PATH}/bind", shell=True, check=False)
+    subprocess.run(f"echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/unbind", shell=True, check=False)
+    subprocess.run(f"echo {WACOM_DEV} > {WACOM_DRV_PATH}/bind", shell=True, check=False)
 
 def switch_to_keyboard_mode():
-    subprocess.run(f"echo 1; echo {WACOM_DEV} > {WACOM_DRV_PATH}/unbind", shell=True, check=False)
-    subprocess.run(f"echo 2; echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/bind", shell=True, check=False)
+    subprocess.run(f"echo {WACOM_DEV} > {WACOM_DRV_PATH}/unbind", shell=True, check=False)
+    subprocess.run(f"echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/bind", shell=True, check=False)
 
 
 if len(sys.argv) == 1:
@@ -37,8 +37,6 @@ switch_to_keyboard_mode()
 
 for event in penKey.read_loop():
     if event.type==evdev.ecodes.EV_KEY:
-        print(evdev.categorize(event))
-
         if event.value == 0:
             continue
 
