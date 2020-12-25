@@ -1,5 +1,6 @@
 yogabook-support (1.1) unstable; urgency=medium
 
+  * Pen key handler: disable Wacom digitizer by default
   * Add udev&hwdb rules for accelerometers
   * Add python3-evdev dependency
 
