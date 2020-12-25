@@ -1,0 +1,12 @@
+sensor:modalias:platform:HID-SENSOR-200073:id:HID-SENSOR-200073.9.auto:dmi:bvnLENOVO*pnLenovoYB1-X9*
+ ACCEL_LOCATION=display
+
+sensor:modalias:platform:HID-SENSOR-200073:id:HID-SENSOR-200073.10.auto:dmi:bvnLENOVO*pnLenovoYB1-X9*
+ ACCEL_LOCATION=base
+
+sensor:modalias:platform:HID-SENSOR-200073:id:HID-SENSOR-200073.18.auto:dmi:bvnLENOVO*pnLenovoYB1-X9*
+ ACCEL_LOCATION=display
+
+sensor:modalias:platform:HID-SENSOR-200073:id:HID-SENSOR-200073.19.auto:dmi:bvnLENOVO*pnLenovoYB1-X9*
+ ACCEL_LOCATION=base
+
