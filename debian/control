@@ -11,7 +11,8 @@ Rules-Requires-Root: no
 
 Package: yogabook-support
 Architecture: all
-Depends: python3, python3-evdev, python3-pyudev, ${shlibs:Depends}, ${misc:Depends}
+Depends: python3, python3-evdev, python3-pyudev, iio-sensor-proxy,
+ ${shlibs:Depends}, ${misc:Depends}
 Description: Files and utilities to support Linux on Lenovo Yoha Book tablet
  Package contains pen button handler to switch halo keyboard mode between
  keyboard and wacom digitizer.
