@@ -2,3 +2,4 @@ yogabook-modes-handler usr/sbin
 61-sensor-yogabook.rules lib/udev/rules.d
 61-sensor-yogabook.hwdb lib/udev/hwdb.d
 yogabook-modes-handler.service lib/systemd/system
+monitor-sensor.service lib/systemd/system

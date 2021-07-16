@@ -1,0 +1,9 @@
+[Unit]
+Description=Hinge Angle sensor monitor
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/monitor-sensor --hinge
+
+[Install]
+WantedBy=default.target
