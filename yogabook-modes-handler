@@ -165,17 +165,13 @@ while True:
         device = key.fileobj
 
         try:
-            events = device.read()
-        except BlockingIOError as e:
-            logging.debug("evdev device events reading error")
-            logging.debug(e)
+            event = device.read_one()
         except Exception as e:
             logging.info("Failed to read from {}".format(device))
             logging.info(e)
             selector.unregister(device)
             del monitored_devices[device.path]
         
-        for event in events:
-            handle_input_event(event)
+        handle_input_event(event)
 
 observer.stop()
