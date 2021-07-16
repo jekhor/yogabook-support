@@ -1,6 +1,0 @@
-[Unit]
-Description=Yoga Book Pen key handler
-
-[Service]
-Type=simple
-ExecStart=/usr/sbin/pen-key-handler %I

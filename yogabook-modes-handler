@@ -1,0 +1,181 @@
+#!/usr/bin/python3
+
+import evdev, evdev.ecodes as ecodes
+import subprocess
+import sys
+import os
+import time
+import queue
+import selectors
+import pyudev
+import logging
+
+
+GOODIX_DEV = "i2c-GDIX1001:00"
+GOODIX_DRV_PATH = "/sys/bus/i2c/drivers/Goodix-TS"
+
+WACOM_DEV = "i2c-WCOM0019:00"
+WACOM_DRV_PATH = "/sys/bus/i2c/drivers/i2c_hid_acpi"
+
+tablet_mode = False
+keyboard_mode = True
+
+logging.basicConfig( encoding='utf-8', level=logging.DEBUG)
+
+def disable_keyboard():
+    logging.info("Disable keyboard")
+    subprocess.run(f"echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/unbind", shell=True, check=False)
+
+def enable_keyboard():
+    logging.info("Enable keyboard")
+    subprocess.run(f"echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/bind", shell=True, check=False)
+    # Workaround: update the hardware state after returning from the tablet mode or opening of the lid
+    subprocess.run("cat /sys/class/leds/ybwmi:kbd_backlight/brightness | cat > /sys/class/leds/ybwmi:kbd_backlight/brightness", shell=True, check=False)
+
+def disable_digitizer():
+    logging.info("Disable digitizer")
+    subprocess.run(f"echo {WACOM_DEV} > {WACOM_DRV_PATH}/unbind", shell=True, check=False)
+
+def enable_digitizer():
+    logging.info("Enable digitizer")
+    subprocess.run(f"echo {WACOM_DEV} > {WACOM_DRV_PATH}/bind", shell=True, check=False)
+
+def switch_to_digitizer_mode():
+    global keyboard_mode
+
+    disable_keyboard()
+    enable_digitizer()
+    keyboard_mode = False
+
+def switch_to_keyboard_mode():
+    global keyboard_mode
+
+    disable_digitizer()
+    enable_keyboard()
+    keyboard_mode = True
+
+def handle_input_event(event):
+    global tablet_mode
+    global keyboard_mode
+
+    logging.debug("event {}".format(event))
+
+    if not tablet_mode and event.type == evdev.ecodes.EV_KEY:
+        if event.value == 0:
+            return
+
+        if event.code == ecodes.KEY_TOUCHPAD_OFF:
+            switch_to_keyboard_mode()
+
+        if event.code == ecodes.KEY_TOUCHPAD_ON:
+            switch_to_digitizer_mode()
+
+    if event.type == evdev.ecodes.EV_SW and event.code in {evdev.ecodes.SW_TABLET_MODE, evdev.ecodes.SW_LID}: 
+        if event.value == 1:
+            logging.info("Entering to tablet mode")
+            disable_keyboard()
+            disable_digitizer()
+            tablet_mode = True
+        else:
+            logging.info("Exiting from tablet mode")
+            tablet_mode = False
+            if keyboard_mode:
+                enable_keyboard()
+            else:
+                enable_digitizer()
+
+
+monitored_devices = {}
+
+context = pyudev.Context()
+
+monitor = pyudev.Monitor.from_netlink(context)
+monitor.filter_by('input')
+
+device_events = queue.Queue()
+
+def match_dev(device):
+    if not device.sys_name.startswith("event"):
+        return False
+
+    try:
+        ed = evdev.InputDevice(device.device_node)
+        caps = ed.capabilities()
+
+        if ecodes.EV_KEY in caps and ecodes.KEY_TOUCHPAD_OFF in caps[ecodes.EV_KEY] and ecodes.KEY_TOUCHPAD_ON in caps[ecodes.EV_KEY]:
+            logging.info("Found evdev with touchpad ON/OFF capabilities: {}".format(device.device_node))
+            return True
+
+        if ecodes.EV_SW in caps and ecodes.SW_TABLET_MODE in caps[ecodes.EV_SW]:
+            logging.info("Found evdev for tablet mode switch: {}".format(device.device_node))
+            return True
+
+        if ecodes.EV_SW in caps and ecodes.SW_LID in caps[ecodes.EV_SW]:
+            logging.info("Found evdev for lid switch: {}".format(device.device_node))
+            return True
+    except:
+        return False
+
+
+def udev_event(action, device):
+    logging.debug("udev: {} device: {}".format(action, device))
+
+    if action == "add":
+        if match_dev(device):
+            device_events.put(('add', device))
+
+    if action == "remove":
+        device_events.put(('remove', device))
+        
+
+observer = pyudev.MonitorObserver(monitor, udev_event)
+observer.start()
+
+for device in context.list_devices(subsystem="input"):
+    if match_dev(device):
+        ed = evdev.InputDevice(device.device_node)
+        monitored_devices[device.device_node] = ed
+
+selector = selectors.DefaultSelector()
+for node, ed in monitored_devices.items():
+    selector.register(ed, selectors.EVENT_READ)
+
+
+while True:
+    select_events = selector.select(timeout=1)
+    
+    if len(select_events) == 0:
+        while device_events.qsize() > 0:
+            action, device = device_events.get()
+           
+            if action == "remove":
+                if device.device_node in monitored_devices:
+                    ed = monitored_devices[device.device_node]
+                    selector.unregister(ed)
+                    del monitored_devices[device.device_node]
+
+            if action == "add":
+                ed = evdev.InputDevice(device.device_node)
+                monitored_devices[device.device_node] = ed
+                selector.register(ed, selectors.EVENT_READ)
+
+            device_events.task_done()
+
+    for key, mask in select_events:
+        device = key.fileobj
+
+        try:
+            events = device.read()
+        except BlockingIOError as e:
+            logging.debug("evdev device events reading error")
+            logging.debug(e)
+        except Exception as e:
+            logging.info("Failed to read from {}".format(device))
+            logging.info(e)
+            selector.unregister(device)
+            del monitored_devices[device.path]
+        
+        for event in events:
+            handle_input_event(event)
+
+observer.stop()

@@ -1,0 +1,10 @@
+[Unit]
+Description=Yoga Book modes handler
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/yogabook-modes-handler
+StandardOutput=journal
+
+[Install]
+WantedBy=default.target
