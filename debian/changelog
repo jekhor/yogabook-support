@@ -1,3 +1,10 @@
+yogabook-support (1.2) UNRELEASED; urgency=medium
+
+  * Set mount matrix for base accelerometer
+  * Replace pen button handler with more complex mode monitor
+
+ -- Yauhen Kharuzhy <jekhor@gmail.com>  Fri, 16 Jul 2021 21:31:56 +0300
+
 yogabook-support (1.1) unstable; urgency=medium
 
   * Pen key handler: disable Wacom digitizer by default
