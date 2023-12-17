@@ -1,0 +1,7 @@
+ACTION=="remove", GOTO="default_end"
+
+SUBSYSTEM=="leds", DEVPATH=="*/ybwmi::kbd_backlight", ENV{ID_BACKLIGHT_CLAMP}="20%%"
+
+LABEL="default_end"
+
+
