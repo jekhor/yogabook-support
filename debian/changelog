@@ -1,9 +1,18 @@
+yogabook-support (1.3) UNRELEASED; urgency=medium
+
+  * Fix IO error handling at reading from evdev
+  * Install monitor-sensor service to claim hinge angle sensor
+  * Add iio-sensor-proxy to dependencies
+  * Add udev rule to clamp minimal keyboard brightness at boot
+
+ -- Yauhen Kharuzhy <jekhor@gmail.com>  Sun, 17 Dec 2023 17:22:20 +0200
+
 yogabook-support (1.2) unstable; urgency=medium
 
   * Set mount matrix for base accelerometer
   * Replace pen button handler with more complex mode monitor
 
- -- Yauhen Kharuzhy <jekhor@gmail.com>  Fri, 16 Jul 2021 21:31:56 +0300
+ -- Yauhen Kharuzhy <jekhor@gmail.com>  Sun, 17 Dec 2023 17:20:27 +0200
 
 yogabook-support (1.1) unstable; urgency=medium
 
