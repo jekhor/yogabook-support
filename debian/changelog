@@ -1,4 +1,4 @@
-yogabook-support (1.2) UNRELEASED; urgency=medium
+yogabook-support (1.2) unstable; urgency=medium
 
   * Set mount matrix for base accelerometer
   * Replace pen button handler with more complex mode monitor
