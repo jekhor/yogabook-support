@@ -10,80 +10,35 @@ import selectors
 import pyudev
 import logging
 
-
-GOODIX_DEV = "i2c-GDIX1001:00"
-GOODIX_DRV_PATH = "/sys/bus/i2c/drivers/Goodix-TS"
-
-WACOM_DEV = "i2c-WCOM0019:00"
-WACOM_DRV_PATH = "/sys/bus/i2c/drivers/i2c_hid_acpi"
-
-tablet_mode = False
-keyboard_mode = True
+TS_DEV = "i2c-HDP0001:00"
+TS_DRV_PATH = "/sys/bus/i2c/drivers/i2c_hid_acpi"
 
 logging.basicConfig( encoding='utf-8', level=logging.DEBUG)
 
-def disable_keyboard():
-    logging.info("Disable keyboard")
-    subprocess.run(f"echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/unbind", shell=True, check=False)
+def disable_touchscreen():
+    logging.info("Disable touchscreen")
+    subprocess.run(f"echo {TS_DEV} > {TS_DRV_PATH}/unbind", shell=True, check=False)
 
-def enable_keyboard():
-    logging.info("Enable keyboard")
-    subprocess.run(f"echo {GOODIX_DEV} > {GOODIX_DRV_PATH}/bind", shell=True, check=False)
-    # Workaround: update the hardware state after returning from the tablet mode or opening of the lid
-    subprocess.run("cat /sys/class/leds/ybwmi:kbd_backlight/brightness | cat > /sys/class/leds/ybwmi:kbd_backlight/brightness", shell=True, check=False)
-
-def disable_digitizer():
-    logging.info("Disable digitizer")
-    subprocess.run(f"echo {WACOM_DEV} > {WACOM_DRV_PATH}/unbind", shell=True, check=False)
-
-def enable_digitizer():
-    logging.info("Enable digitizer")
-    subprocess.run(f"echo {WACOM_DEV} > {WACOM_DRV_PATH}/bind", shell=True, check=False)
-
-def switch_to_digitizer_mode():
-    global keyboard_mode
-
-    disable_keyboard()
-    enable_digitizer()
-    keyboard_mode = False
-
-def switch_to_keyboard_mode():
-    global keyboard_mode
-
-    disable_digitizer()
-    enable_keyboard()
-    keyboard_mode = True
+def enable_touchscreen():
+    logging.info("Enable touchscreen")
+    subprocess.run(f"echo {TS_DEV} > {TS_DRV_PATH}/bind", shell=True, check=False)
 
 def handle_input_event(event):
-    global tablet_mode
-    global keyboard_mode
-
     logging.debug("event {}".format(event))
 
-    if not tablet_mode and event.type == evdev.ecodes.EV_KEY:
-        if event.value == 0:
-            return
-
-        if event.code == ecodes.KEY_TOUCHPAD_OFF:
-            switch_to_keyboard_mode()
-
-        if event.code == ecodes.KEY_TOUCHPAD_ON:
-            switch_to_digitizer_mode()
-
-    if event.type == evdev.ecodes.EV_SW and event.code in {evdev.ecodes.SW_TABLET_MODE, evdev.ecodes.SW_LID}: 
+    if event.type == evdev.ecodes.EV_SW and event.code == evdev.ecodes.SW_TABLET_MODE:
         if event.value == 1:
             logging.info("Entering to tablet mode")
-            disable_keyboard()
-            disable_digitizer()
-            tablet_mode = True
         else:
             logging.info("Exiting from tablet mode")
-            tablet_mode = False
-            if keyboard_mode:
-                enable_keyboard()
-            else:
-                enable_digitizer()
 
+    if event.type == evdev.ecodes.EV_SW and event.code == evdev.ecodes.SW_LID:
+        if event.value == 1:
+            logging.info("Lid is closed, disabling touchscreen")
+            disable_touchscreen()
+        else:
+            logging.info("Lid is opened, enabling touchscreen")
+            enable_touchscreen()
 
 monitored_devices = {}
 
@@ -126,7 +81,7 @@ def udev_event(action, device):
 
     if action == "remove":
         device_events.put(('remove', device))
-        
+
 
 observer = pyudev.MonitorObserver(monitor, udev_event)
 observer.start()
@@ -143,11 +98,11 @@ for node, ed in monitored_devices.items():
 
 while True:
     select_events = selector.select(timeout=1)
-    
+
     if len(select_events) == 0:
         while device_events.qsize() > 0:
             action, device = device_events.get()
-           
+
             if action == "remove":
                 if device.device_node in monitored_devices:
                     ed = monitored_devices[device.device_node]
@@ -171,7 +126,7 @@ while True:
             logging.info(e)
             selector.unregister(device)
             del monitored_devices[device.path]
-        
+
         handle_input_event(event)
 
 observer.stop()
