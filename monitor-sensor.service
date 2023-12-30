@@ -5,5 +5,5 @@ Description=Hinge Angle sensor monitor
 Type=simple
 ExecStart=/usr/bin/monitor-sensor --hinge
 
-[Install]
-WantedBy=default.target
+#[Install]
+#WantedBy=default.target
