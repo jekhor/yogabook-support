@@ -1,11 +1,13 @@
-yogabook-support (1.3) UNRELEASED; urgency=medium
+yogabook-support (1.3) unstable; urgency=medium
 
   * Fix IO error handling at reading from evdev
   * Install monitor-sensor service to claim hinge angle sensor
   * Add iio-sensor-proxy to dependencies
   * Add udev rule to clamp minimal keyboard brightness at boot
+  * yogabook-modes-handler: Use for disabling touchscreen at lid closing
+  * Remove obsoleted pen-key-handler
 
- -- Yauhen Kharuzhy <jekhor@gmail.com>  Sun, 17 Dec 2023 17:22:20 +0200
+ -- Yauhen Kharuzhy <jekhor@gmail.com>  Sat, 30 Dec 2023 02:27:06 +0200
 
 yogabook-support (1.2) unstable; urgency=medium
 
