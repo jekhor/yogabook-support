@@ -13,6 +13,7 @@ Package: yogabook-support
 Architecture: all
 Depends: python3, python3-evdev, python3-pyudev, iio-sensor-proxy,
  firmware-sof-signed, firmware-intel-sound, firmware-brcm80211,
+ alsa-ucm-conf-yogabook,
  ${shlibs:Depends}, ${misc:Depends}
 Description: Files and utilities to support Linux on Lenovo Yoha Book tablet
  Package contains pen button handler to switch halo keyboard mode between
