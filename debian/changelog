@@ -1,3 +1,9 @@
+yogabook-support (1.5) unstable; urgency=medium
+
+  * Add GRUB config for kernel cmdline
+
+ -- Yauhen Kharuzhy <jekhor@gmail.com>  Sat, 10 Feb 2024 23:14:08 +0200
+
 yogabook-support (1.4) unstable; urgency=medium
 
   * Don't install monitor service
